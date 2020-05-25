@@ -2,22 +2,60 @@
 
 This is a library for computing statistics about the deck-building game Dominion. Right now, the simulator is extremely limited in what kinds of questions it can answer and what kinds of cards it can simluate, but hopefully this will grow with time.
 
-## Example
+## Example 1 - Choosing a card to buy
+
+```
+from dominion_oracle.simulation import BuyOneSimulation
+from dominion_oracle.formatter import print_grid_table
+
+deck = ["copper"] * 7 + ["estate"] * 3
+candidates = ["copper", "silver", "duchy"]
+
+simulation = BuyOneSimulation(deck, candidates)
+y_vals, cell_vals = simulation.expected_terminal_values(n=10000)
+print(simulation.description())
+print_grid_table(y_vals=y_vals, cell_vals=cell_vals)
+```
+
+### Output
+
+<pre>
+Expected values for a base deck of copper * 7, estate * 3 and one card added
++--------+-------+
+| (none) |  3.5  |
++--------+-------+
+| copper | 3.629 |
++--------+-------+
+| silver | 4.089 |
++--------+-------+
+| duchy  | 3.192 |
++--------+-------+
+</pre>
+
+
+## Example 2 - Exploring 2-card interactions
 
 ```
 from dominion_oracle.simulation import GridSimulation
 from dominion_oracle.formatter import print_grid_table
+from functools import partial
 
 core_cards = ["copper"] * 7 + ["estate"] * 3 + ["gold"]
 smithy = "smithy"
 village = "village"
 
+
+def label(entity, value):
+    return f"{value} {entity}"
+
+
 simulation = GridSimulation(core_cards, card_x=smithy, card_y=village, x_max=6, y_max=5)
-x_label = "{} " + smithy
-y_label = "{} " + village
-results = simulation.expected_terminal_values(n=10000)
+x_vals, y_vals, cell_vals = simulation.expected_terminal_values(n=10000)
 print(simulation.description())
-print_grid_table(results, x_label=x_label, y_label=y_label)
+print_grid_table(
+    x_vals, y_vals, cell_vals, x_label=partial(label, smithy), y_label=partial(label, village)
+)
+
 ```
 
 ### Output

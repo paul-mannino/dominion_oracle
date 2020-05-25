@@ -24,11 +24,24 @@ class Board:
 HAND_SIZE = 5
 
 
+def coerce_card(name_or_card):
+    if isinstance(name_or_card, Card):
+        return name_or_card
+    return create_card(name_or_card)
+
+
+def coerce_cards(card_list):
+    return [coerce_card(card) for card in card_list]
+
+
+def compressed_deck(deck):
+    c = Counter(deck)
+    return ", ".join([f"{card} * {count}" for card, count in c.items()])
+
+
 class Simulation:
     def __init__(self, card_list):
-        self.card_list = [
-            card if isinstance(card, Card) else create_card(card) for card in card_list
-        ]
+        self.card_list = coerce_cards(card_list)
 
     def expected_terminal_value(self, n=10000):
         total = 0
@@ -81,25 +94,46 @@ class Simulation:
 
 
 class GridSimulation:
-    def __init__(self, core_cards, card_x, card_y, x_min=1, x_max=1, y_min=1, y_max=1):
-        self.core_cards = core_cards
-        self.card_x = card_x
-        self.card_y = card_y
+    def __init__(self, base_deck, card_x, card_y, x_min=1, x_max=1, y_min=1, y_max=1):
+        self.base_deck = coerce_cards(base_deck)
+        self.card_x = coerce_card(card_x)
+        self.card_y = coerce_card(card_y)
         self.x_min = x_min
         self.x_max = x_max
         self.y_min = y_min
         self.y_max = y_max
 
     def expected_terminal_values(self, n=10000):
-        results = []
+        x_vals = []
+        y_vals = []
+        z_vals = []
         for x in range(self.x_min, self.x_max + 1):
             for y in range(self.y_min, self.y_max + 1):
-                simulation = Simulation(self.core_cards + [self.card_x] * x + [self.card_y] * y)
-                results.append([x, y, simulation.expected_terminal_value(n=n)])
-        return results
+                simulation = Simulation(self.base_deck + [self.card_x] * x + [self.card_y] * y)
+                x_vals.append(x)
+                y_vals.append(y)
+                z_vals.append(simulation.expected_terminal_value(n=n))
+        return x_vals, y_vals, z_vals
 
     def description(self):
-        c = Counter(self.core_cards)
-        compressed = ", ".join([f"{card} * {count}" for card, count in c.items()])
-
+        compressed = compressed_deck(self.base_deck)
         return f"Expected values for a base deck of {compressed}"
+
+
+class BuyOneSimulation:
+    def __init__(self, base_deck, buy_candidates):
+        self.base_deck = coerce_cards(base_deck)
+        self.buy_candidates = coerce_cards(buy_candidates)
+
+    def expected_terminal_values(self, n=10000):
+        x_vals = ["(none)"]
+        y_vals = [Simulation(self.base_deck).expected_terminal_value(n=n)]
+        for card in self.buy_candidates:
+            simulation = Simulation(self.base_deck + [card])
+            x_vals.append(card.name)
+            y_vals.append(simulation.expected_terminal_value(n=n))
+        return x_vals, y_vals
+
+    def description(self):
+        compressed = compressed_deck(self.base_deck)
+        return f"Expected values for a base deck of {compressed} and one card added"

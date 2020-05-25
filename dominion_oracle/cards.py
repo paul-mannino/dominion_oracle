@@ -38,6 +38,15 @@ class Card:
     def action_phase(self):
         return False
 
+    def __str__(self):
+        return self.name
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return isinstance(other, Card) and self.name == other.name
+
 
 class Treasure(Card):
     def __init__(self, name=None, cost=0, value=0):
