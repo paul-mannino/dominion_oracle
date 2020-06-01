@@ -1,15 +1,15 @@
-from dominion_oracle.cards import create_card
+from dominion_oracle.cards import library
 
 
 def test_create_treasure():
-    card = create_card("Gold")
+    card = library.get_card("Gold")
     assert card.name == "gold"
     assert card.value == 3
     assert card.cost == 6
 
 
 def test_create_action():
-    card = create_card("village")
+    card = library.get_card("village")
     assert card.name == "village"
     assert card.value == 0
     assert card.cost == 3

@@ -1,5 +1,5 @@
 from dominion_oracle.simulation import Simulation
-from dominion_oracle.cards import create_card
+from dominion_oracle.cards import library
 
 
 def assert_close(expected, actual, tolerance=0.05):
@@ -7,13 +7,13 @@ def assert_close(expected, actual, tolerance=0.05):
 
 
 def test_expected_value_of_starting_deck():
-    card_list = [create_card(name) for name in ["estate"] * 3 + ["copper"] * 7]
+    card_list = library.get_cards(["estate"] * 3 + ["copper"] * 7)
     assert_close(3.5, Simulation(card_list).expected_terminal_value())
 
 
 def test_expected_value_of_deck_with_draw():
-    cards = ["copper"] * 7 + ["estate"] * 3 + ["gold", "smithy", "village"]
-    simulation = Simulation([create_card(name) for name in cards])
+    cards = library.get_cards(["copper"] * 7 + ["estate"] * 3 + ["gold", "smithy", "village"])
+    simulation = Simulation(cards)
     assert_close(5.205, simulation.expected_terminal_value())
 
 

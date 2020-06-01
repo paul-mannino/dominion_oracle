@@ -19,18 +19,6 @@ VICTORIES = {
 }
 
 
-def create_card(name):
-    sanitized_name = "_".join(word for word in name.lower().split(" "))
-    if sanitized_name in ACTIONS:
-        return Action(name=sanitized_name, **ACTIONS[sanitized_name])
-    elif sanitized_name in TREASURES:
-        return Treasure(name=sanitized_name, **TREASURES[sanitized_name])
-    elif sanitized_name in VICTORIES:
-        return Victory(name=sanitized_name, **VICTORIES[sanitized_name])
-
-    raise ValueError(f"unknown card #{name} for type")
-
-
 class Card:
     def buy_phase(self):
         return False
